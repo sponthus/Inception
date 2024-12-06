@@ -20,10 +20,11 @@ RUN		openssl req -newkey rsa:4096 \
 		-subj "/C=FR/ST=Lyon/O=42/CN=sponthus.42.fr" \
 		-out /etc/nginx/key/sponthus.crt \
 		-keyout /etc/nginx/key/sponthus.key
+		# -addext "subjectAltNames=DNS:$DOMAIN_NAME" \
 		
 COPY	/conf/nginx.conf /etc/nginx/conf.d
-	# -addext "subjectAltNames=DNS:$DOMAIN_NAME" \
 EXPOSE  443
+EXPOSE	80
 
 # ENTRYPOINT	["sh", "/usr/local/bin/docker-entrypoint.sh"]
 # ENTRYPOINT	["docker-entrypoint.sh"]
