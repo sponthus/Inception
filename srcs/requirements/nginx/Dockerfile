@@ -1,8 +1,6 @@
 FROM	debian:buster
 
 CMD		["echo", "Test is it working ?"]
-# NE MARCHE PAS 
-CMD		["echo", "with domain name = $DOMAIN_NAME"]
 
 RUN		apt-get update
 RUN		apt-get install -y \
@@ -23,8 +21,8 @@ RUN		openssl req -newkey rsa:4096 \
 		# -addext "subjectAltNames=DNS:$DOMAIN_NAME" \
 		
 COPY	/conf/nginx.conf /etc/nginx/conf.d
+
 EXPOSE  443
-EXPOSE	80
 
 # ENTRYPOINT	["sh", "/usr/local/bin/docker-entrypoint.sh"]
 # ENTRYPOINT	["docker-entrypoint.sh"]
