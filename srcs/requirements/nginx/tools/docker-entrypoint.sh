@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Generating a self signed certificate
 # -x509 = self signed 
 # -out = private key

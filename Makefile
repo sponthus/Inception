@@ -1,38 +1,40 @@
 NETWORK = srcs_network
 
-IMAGE = srcs-nginx
+IMAGE = srcs-nginx \
+	srcs-mariadb
 
-CONTAINER = nginx-container
+CONTAINER = nginx \
+	mariadb
 
-VOLUMES = 
+VOLUMES = mariadb_vol
 
 all:
 	docker compose -f ./srcs/docker-compose.yml up -d --build
 
-re:
-	docker compose -f srcs/docker-compose.yml up -d --build
+re: clean all
 
 clean:
+	docker compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
+	
 	@echo "① Stopping and deleting containers"
-	@if [ -n "$$(docker ps | grep -E '$(CONTAINER)')" ]; \
-		then \
-			for container in $(CONTAINER); do \
-				docker stop $$container; \
-				echo "  ➥ Stopped"; \
-				docker rm $$container; \
-				echo "  ➥ Suppressed"; \
-			done; \
-		echo " ✔ Done"; \
-		else echo " ✘ No container up"; fi
+	@for container in $(CONTAINER); do \
+		if [ -n "$$(docker ps -a --format="{{.Names}}" --filter=name="$$container")" ]; then \
+			docker down $$container; \
+			echo "  ➥ Stopped $$container"; \
+			docker rm $$container; \
+			echo "  ➥ Suppressed $$container"; \
+		fi \
+	done ;
+	@echo " ✔ Done";
 
 	@echo "② Suppressing docker images"
-	@if [ -n "$$(docker images -a | grep -E '$(IMAGE)')" ]; \
-	then \
-		for image in $(IMAGE); do \
+	@for image in $(IMAGE); do \
+		if [ -n "$$(docker images -qa --filter=reference="$$image")" ]; then \
 			docker image rm $$(docker images --filter=reference="$$image" --format="{{.ID}}"); \
-		done; \
-	echo " ✔ Done"; \
-	else echo " ✘ No images up"; fi
+			echo "  ➥ Suppressed $$image"; \
+		fi \
+	done; \
+	echo " ✔ Done";
 
 # Add specified volume destruction plz
 	@echo "③ Suppressing docker volumes"

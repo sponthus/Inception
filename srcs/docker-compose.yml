@@ -1,7 +1,7 @@
 services:
 
   nginx:
-    container_name: nginx-container
+    container_name: nginx
     build: 
       context: requirements/nginx
     ports:
@@ -16,6 +16,19 @@ services:
     # env_file:
     #   - .env
 
+  mariadb:
+    container_name: mariadb
+    build:
+      context: requirements/mariadb
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - /home/sponthus/data:/var/lib/mysql
+    networks:
+      - network
+    env_file:
+      - .env
 networks:
   network:
     driver: bridge
