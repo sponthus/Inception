@@ -24,11 +24,25 @@ services:
       - "3306:3306"
     restart: always
     volumes:
-      - /home/sponthus/data:/var/lib/mysql
+      - /home/sponthus/data/mysql_data:/var/lib/mysql
     networks:
       - network
     env_file:
       - .env
+
+  wordpress:
+    container_name: wordpress
+    build:
+      context: requirements/wordpress
+    volumes:
+      - /home/sponthus/data/wordpress_data:/var/lib/html
+    networks:
+      - network
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+
 networks:
   network:
     driver: bridge

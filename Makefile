@@ -1,10 +1,12 @@
 NETWORK = srcs_network
 
 IMAGE = srcs-nginx \
-	srcs-mariadb
+	srcs-mariadb \
+	srcs-wordpress
 
 CONTAINER = nginx \
-	mariadb
+	mariadb \
+	wordpress
 
 VOLUMES = mariadb_vol
 
@@ -14,9 +16,9 @@ all:
 re: clean all
 
 clean:
-	docker compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
 	
 	@echo "① Stopping and deleting containers"
+	@docker compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
 	@for container in $(CONTAINER); do \
 		if [ -n "$$(docker ps -a --format="{{.Names}}" --filter=name="$$container")" ]; then \
 			docker down $$container; \
@@ -33,8 +35,9 @@ clean:
 			docker image rm $$(docker images --filter=reference="$$image" --format="{{.ID}}"); \
 			echo "  ➥ Suppressed $$image"; \
 		fi \
-	done; \
-	echo " ✔ Done";
+	done;
+	@docker image prune -f
+	@echo " ✔ Done";
 
 # Add specified volume destruction plz
 	@echo "③ Suppressing docker volumes"

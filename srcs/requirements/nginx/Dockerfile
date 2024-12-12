@@ -8,7 +8,7 @@ RUN		apt-get install -y \
 		openssl
 
 		# COPY	tools/docker-entrypoint.sh /usr/local/bin/
-COPY	tools/index.html /var/www/html/
+# COPY	tools/index.html /var/www/html/
 		
 		# RUN		chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN		mkdir /etc/nginx/key
