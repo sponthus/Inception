@@ -25,16 +25,17 @@ if [ ! -d "wp-config.php" ]; then
         --title="$WORDPRESS_TITLE" \
         --admin_user="$WORDPRESS_ADMIN_USER" \
         --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
-        --admin_email="$WORDPRESS_ADMIN_EMAIL"
+        --skip-email
     wp -path='/wp' user create "$WORDPRESS_USER" "$WORDPRESS_USER_EMAIL" \
-        --role='editor' \
+        --role='author' \
         --user_pass="$WORDPRESS_USER_PASSWORD"
     echo "Wordpress configured"
 else
     echo "Wordpress already installed"
 fi
 
-sed -i 's|^listen = .*|listen = 9000|' "/etc/php/7.3/fpm/pool.d/www.conf"
+echo "Configurating php to listen on 9001 : "
+sed -i 's|^listen = .*|listen = 9001|' "/etc/php/7.3/fpm/pool.d/www.conf"
 service php7.3-fpm restart
 
 if [ ! -d "/run/php" ]; then
@@ -44,9 +45,8 @@ if [ ! -d "/run/php" ]; then
     echo "/run/php directory created."
 fi
 
-# kill le protocole TCP
+# kill le protocole TCP si listen 9000
 
 php-fpm7.3 -F
 
 sleep infinity
-# bonjour sleep infinity 
