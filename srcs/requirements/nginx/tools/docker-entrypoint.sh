@@ -13,7 +13,8 @@
 #  SAN = Subject Alternative Names, other addresses covered by the certificate
 #  ex: hello.com has www.hello.com SAN (DNS:)
 #  DNS: = domain name, IP: = IP, email:, URI:, otherName: ... 
-# -nodes = pas de passphrase
+# -nodes = no passphrase
+
 openssl req -newkey rsa:4096 \
 	-x509 \
 	-subj "/C=FR/ST=FR/O=42/CN=$DOMAIN_NAME" \
