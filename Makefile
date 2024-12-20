@@ -1,53 +1,65 @@
-NETWORK = srcs_network
+all: up
 
-IMAGE = srcs-nginx \
-	srcs-mariadb \
-	srcs-wordpress
+# up: secrets
+up:
+	@mkdir -p ~/data
+	@mkdir -p ~/data/wordpress
+	@mkdir -p ~/data/mariadb
+	docker-compose -f srcs/docker-compose.yml up --build --detach
 
-CONTAINER = nginx \
-	mariadb \
-	wordpress
+build:
+	docker-compose -f srcs/docker-compose.yml build --no-cache
 
-VOLUMES = mariadb_vol
+down:
+	docker-compose -f srcs/docker-compose.yml down
 
-all:
-	docker compose -f ./srcs/docker-compose.yml up -d --build
+start:
+	docker-compose -f srcs/docker-compose.yml start
 
-re: clean all
+stop:
+	docker-compose -f srcs/docker-compose.yml stop
+
+logs:
+	docker-compose -f srcs/docker-compose.yml logs --follow
+
+prune:
+	docker system prune --all --volumes --force
+
+mysql:
+	docker-compose -f srcs/docker-compose.yml exec mariadb mysql
 
 clean:
-	
-	@echo "① Stopping and deleting containers"
-	@docker compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
-	@for container in $(CONTAINER); do \
-		if [ -n "$$(docker ps -a --format="{{.Names}}" --filter=name="$$container")" ]; then \
-			docker down $$container; \
-			echo "  ➥ Stopped $$container"; \
-			docker rm $$container; \
-			echo "  ➥ Suppressed $$container"; \
-		fi \
-	done ;
-	@echo " ✔ Done";
+	docker-compose -f srcs/docker-compose.yml down --volumes --rmi all
 
-	@echo "② Suppressing docker images"
-	@for image in $(IMAGE); do \
-		if [ -n "$$(docker images -qa --filter=reference="$$image")" ]; then \
-			docker image rm $$(docker images --filter=reference="$$image" --format="{{.ID}}"); \
-			echo "  ➥ Suppressed $$image"; \
-		fi \
-	done;
-	@docker image prune -f
-	@echo " ✔ Done";
+fclean: clean
+#	Use docker run to remove data because of permissions
+	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
+	# rm -rf ./secrets/
 
-# Add specified volume destruction plz
-	@echo "③ Suppressing docker volumes"
-	@if [ -n "$$(docker volume ls -q)" ]; then docker volume rm $$(docker volume ls -q) && echo " ✔ Done"; \
-		else echo " ✘ No volumes found"; fi
-	
-	@echo "④ Suppressing docker networks"
-	@if [ -n "$$(docker network ls --format "{{.Name}}" | grep -E '$(NETWORK)')" ]; \
-		then docker network ls --format "{{.Name}}" | grep -E '$(NETWORK)' | xargs -r docker network rm; \
-		echo " ✔ Done"; \
-	else echo " ✘ No networks other than default found"; fi
+re: fclean up
 
-.PHONY: all re clean
+# secrets:
+# @mkdir -p $@
+# openssl rand -hex -out $@/db_root_password 16
+# openssl rand -hex -out $@/db_password 16
+# openssl rand -hex -out $@/wp_admin_password 16
+# openssl rand -hex -out $@/wp_password 16
+# openssl req -x509 -newkey rsa:2048 -keyout $@/ssl_certificate_key -out $@/ssl_certificate -days 365 -nodes -subj "/CN=grebrune.42.fr" 2> /dev/null
+
+help:
+	@echo "Makefile for Docker Compose"
+	@echo "Available targets:"
+	@echo "  up	  - Start services"
+	@echo "  build   - Build services"
+	@echo "  down	- Remove services"
+	@echo "  start   - Start services"
+	@echo "  stop	- Stop services"
+	@echo "  logs	- View logs"
+	@echo "  prune   - Remove all unused containers and images"
+	@echo "  mysql   - Execute mariadb monitor"
+	@echo "  re	  - Restart services with fclean & up"
+	@echo "  fclean  - Call clean and remove data, secrets & certificates"
+	@echo "  clean   - Remove volumes and stop services"
+	@echo "  help	- Show this help message"
+
+.PHONY: all up build down start stop logs prune mysql re fclean clean

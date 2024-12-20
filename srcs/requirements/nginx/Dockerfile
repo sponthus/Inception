@@ -22,7 +22,7 @@ RUN		openssl req -newkey rsa:4096 \
 		
 COPY	/conf/nginx.conf /etc/nginx/conf.d
 
-EXPOSE  443
+EXPOSE  4443
 
 # ENTRYPOINT	["sh", "/usr/local/bin/docker-entrypoint.sh"]
 # ENTRYPOINT	["docker-entrypoint.sh"]

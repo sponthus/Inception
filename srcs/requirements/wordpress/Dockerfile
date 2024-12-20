@@ -21,7 +21,7 @@ RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
 
 # RUN	chown -R www-data:www-data /var/www/html 
 
-EXPOSE 9001
+# EXPOSE 9000
 
 # CMD	[ "php-fpm", "-F" ]
 
