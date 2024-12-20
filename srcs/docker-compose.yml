@@ -6,13 +6,13 @@ services:
       context: requirements/nginx
     ports:
       - "443:443"
-    restart: always
     # volumes:
     #   - ./nginx/conf/:/etc/nginx/conf.d/:ro
     networks:
       - network
     environment :
       - DOMAIN_NAME=sponthus.42.fr
+    restart: always
     # env_file:
     #   - .env
 
@@ -22,13 +22,13 @@ services:
       context: requirements/mariadb
     ports:
       - "3306:3306"
-    restart: always
     volumes:
       - /home/sponthus/data/mysql_data:/var/lib/mysql
     networks:
       - network
     env_file:
       - .env
+    restart: always
 
   wordpress:
     container_name: wordpress

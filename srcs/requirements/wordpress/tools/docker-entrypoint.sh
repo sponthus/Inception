@@ -1,51 +1,61 @@
 #!/bin/sh
 
 if [ ! -d "/var/www/html" ]; then
-    echo "Creating /var/www/html :"
-    mkdir -p /var/www/
-    mkdir -p /var/www/html
-    echo "/var/www/html directory created."
+	echo "Creating /var/www/html :"
+	mkdir -p /var/www/
+	mkdir -p /var/www/html
+	echo "/var/www/html directory created."
 fi
 
 cd /var/www/html
 
 if [ ! -d "wp-config.php" ]; then
-    echo "Downloading wordpress :"
-    wget https://wordpress.org/latest.tar.gz
-    chown -R www-data:www-data latest.tar.gz
-    tar -xzf latest.tar.gz -C wp --strip-components=1
-    echo "Wordpress extracted, configurating"
-    wp --path='/wp' config create \
-        --dbname="$WORDPRESS_DB_NAME" \
-        --dbuser="$WORDPRESS_DB_USER" \
-        --dbhost="$WORDPRESS_DB_HOST" \
-        --dbprefix='wp_'
-    wp --path='/wp' core install \
-        --url="$DOMAIN_NAME" \
-        --title="$WORDPRESS_TITLE" \
-        --admin_user="$WORDPRESS_ADMIN_USER" \
-        --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
-        --skip-email
-    wp -path='/wp' user create "$WORDPRESS_USER" "$WORDPRESS_USER_EMAIL" \
-        --role='author' \
-        --user_pass="$WORDPRESS_USER_PASSWORD"
-    echo "Wordpress configured"
-else
-    echo "Wordpress already installed"
-fi
+	echo "Download of wordpress :"
+	wp core download --allow-root
+	# wget https://wordpress.org/latest.tar.gz
+	# chown -R www-data:www-data latest.tar.gz
+	# tar -xzf latest.tar.gz -C wp --strip-components=1
+	# echo "Wordpress extracted, configurating"
 
-echo "Configurating php to listen on 9001 : "
-sed -i 's|^listen = .*|listen = 9001|' "/etc/php/7.3/fpm/pool.d/www.conf"
-service php7.3-fpm restart
+	mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+
+	sed -i -r "s/database_name_here/$MYSQL_DATABASE/1" wp-config.php
+	sed -i -r "s/username_here/$MYSQL_USER/1" wp-config.php
+	sed -i -r "s/password_here/$MYSQL_PASSWORD/1" wp-config.php
+	sed -i -r "s/localhost/mariadb/1" wp-config.php
+	# wp config create \
+	# 	--dbname="$WORDPRESS_DB_NAME" \
+	# 	--dbuser="$WORDPRESS_DB_USER" \
+	# 	--dbhost="$WORDPRESS_DB_HOST" \
+	# 	--dbprefix='wp_' \
+	# 	--allow-root
+	wp core install \
+		--url="$DOMAIN_NAME" \
+		--title="$WORDPRESS_TITLE" \
+		--admin_user="$WORDPRESS_ADMIN_USER" \
+		--admin_password="$WORDPRESS_ADMIN_PASSWORD" \
+		--admin_email="$WORDPRESS_ADMIN_EMAIL" \
+		--allow-root
+	wp user create "$WORDPRESS_USER" "$WORDPRESS_USER_EMAIL" \
+		--role='author' \
+		--user_pass="$WORDPRESS_USER_PASSWORD" \
+		--allow-root
+	echo "Wordpress configured"
+else
+	echo "Wordpress already installed"
+fi
 
 if [ ! -d "/run/php" ]; then
-    echo "Creating /run/php directory : "
-    mkdir -p /run/php
-    chown -R www-data:www-data /run/php
-    echo "/run/php directory created."
+	echo "Creating /run/php directory : "
+	mkdir -p /run/php
+	chown -R www-data:www-data /run/php
+	echo "/run/php directory created."
 fi
+echo "Configurating php to listen on 9001 : "
+sed -i 's/listen = \/run\/php\/php7.3-fpm.sock/listen = 9001/g' "/etc/php/7.3/fpm/pool.d/www.conf"
+service php7.3-fpm restart
 
-# kill le protocole TCP si listen 9000
+# kill le protocole TCP si il listen 9001
 
 php-fpm7.3 -F
 
