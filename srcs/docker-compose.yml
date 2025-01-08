@@ -2,12 +2,14 @@ services:
 
   nginx:
     container_name: nginx
+    depends_on:
+      - wordpress
     build: 
       context: requirements/nginx
     ports:
-      - "443:443"
-    # volumes:
-    #   - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - "4443:4443"
+    volumes:
+      - wordpress:/var/www/html
     networks:
       - network
     environment :
@@ -20,10 +22,8 @@ services:
     container_name: mariadb
     build:
       context: requirements/mariadb
-    ports:
-      - "3306:3306"
     volumes:
-      - /home/sponthus/data/mysql_data:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     networks:
       - network
     env_file:
@@ -32,17 +32,31 @@ services:
 
   wordpress:
     container_name: wordpress
+    depends_on:
+      - mariadb
     build:
       context: requirements/wordpress
     volumes:
-      - /home/sponthus/data/wordpress_data:/var/lib/html
+      - wordpress:/var/www/html
     networks:
       - network
     env_file:
       - .env
-    depends_on:
-      - mariadb
 
 networks:
   network:
     driver: bridge
+
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/$USE/data/wordpress
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/$USE/data/mariadb
