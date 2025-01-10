@@ -1,65 +1,30 @@
-all: up
+DATA = /home/sponthus/data/
 
-# up: secrets
+all:
+	$(MAKE) up
+
 up:
-	@mkdir -p ~/data
-	@mkdir -p ~/data/wordpress
-	@mkdir -p ~/data/mariadb
-	docker-compose -f srcs/docker-compose.yml up --build --detach
-
-build:
-	docker-compose -f srcs/docker-compose.yml build --no-cache
+	mkdir -p $(DATA)wordpress
+	mkdir -p $(DATA)mariadb
+	docker compose -f srcs/docker-compose.yml up -d --build
 
 down:
-	docker-compose -f srcs/docker-compose.yml down
-
-start:
-	docker-compose -f srcs/docker-compose.yml start
-
-stop:
-	docker-compose -f srcs/docker-compose.yml stop
-
-logs:
-	docker-compose -f srcs/docker-compose.yml logs --follow
-
-prune:
-	docker system prune --all --volumes --force
-
-mysql:
-	docker-compose -f srcs/docker-compose.yml exec mariadb mysql
+	docker compose -f srcs/docker-compose.yml down 
 
 clean:
-	docker-compose -f srcs/docker-compose.yml down --volumes --rmi all
+	docker compose -f srcs/docker-compose.yml down --rmi local -v
 
-fclean: clean
-#	Use docker run to remove data because of permissions
-	docker run -it --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/*"
-	# rm -rf ./secrets/
+fclean:
+	docker compose -f srcs/docker-compose.yml down --rmi all -v --remove-orphans
+	docker image prune -f
+	docker volume prune -f
+	docker network prune -f
+	docker builder prune -f
+	docker system prune -a -f --volumes
+	sudo rm -rf $(DATA)
+	
 
-re: fclean up
+re: fclean
+	$(MAKE) up
 
-# secrets:
-# @mkdir -p $@
-# openssl rand -hex -out $@/db_root_password 16
-# openssl rand -hex -out $@/db_password 16
-# openssl rand -hex -out $@/wp_admin_password 16
-# openssl rand -hex -out $@/wp_password 16
-# openssl req -x509 -newkey rsa:2048 -keyout $@/ssl_certificate_key -out $@/ssl_certificate -days 365 -nodes -subj "/CN=grebrune.42.fr" 2> /dev/null
-
-help:
-	@echo "Makefile for Docker Compose"
-	@echo "Available targets:"
-	@echo "  up	  - Start services"
-	@echo "  build   - Build services"
-	@echo "  down	- Remove services"
-	@echo "  start   - Start services"
-	@echo "  stop	- Stop services"
-	@echo "  logs	- View logs"
-	@echo "  prune   - Remove all unused containers and images"
-	@echo "  mysql   - Execute mariadb monitor"
-	@echo "  re	  - Restart services with fclean & up"
-	@echo "  fclean  - Call clean and remove data, secrets & certificates"
-	@echo "  clean   - Remove volumes and stop services"
-	@echo "  help	- Show this help message"
-
-.PHONY: all up build down start stop logs prune mysql re fclean clean
+.PHONY: all up down clean fclean re

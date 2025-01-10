@@ -1,32 +1,36 @@
-FROM debian:buster
+FROM debian:bullseye
 
-CMD [ "echo", "Test" ]
-
-RUN	apt-get update
-RUN apt-get install -y \
+RUN apt update -y && apt upgrade -y
+RUN apt install -y \
 	wget \
-	php7.3-fpm \
-	php-mysql \
-	&& rm -rf /var/lib/apt/lists/*
+	openssl ca-certificates
 
-# RUN	which php-fpm || ls/usr/sbin/php-fpm*
-
-COPY	tools/docker-entrypoint.sh /usr/local/bin/
-RUN		chmod +x /usr/local/bin/docker-entrypoint.sh
-
-WORKDIR /var/lib/apt/html/
 RUN	wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /tmp/wp-cli.phar \
-	&& mv /tmp/wp-cli.phar /usr/local/bin/wp \
-	&& chmod +x /usr/local/bin/wp
+	&& chmod +x /tmp/wp-cli.phar \
+	&& mv /tmp/wp-cli.phar /usr/local/bin/wp
 
-# RUN	chown -R www-data:www-data /var/www/html 
+RUN mkdir -p /run/php/
+RUN mkdir -p /var/www/wordpress
 
-# EXPOSE 9000
+RUN apt install -y \
+	php-fpm \
+	php-mysqli \
+	mariadb-client
 
-# CMD	[ "php-fpm", "-F" ]
+COPY	./tools/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+COPY	./tools/docker-entrypoint.sh /usr/local/bin/
+RUN		chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY	./tools/twentytwentyfour.1.3.zip /var/www/wordpress/twentytwentyfour.1.3.zip
+
+RUN echo '#!/bin/bash\n \
+while ! nc -z mariadb 3306; do\n \
+  echo "Waiting for MariaDB..."\n \
+  sleep 1\n\
+done\n\
+echo "MariaDB is ready!"' > /wait-for-db.sh
+
+RUN chmod +x /wait-for-db.sh
+
+CMD ["/bin/bash", "-c", "/wait-for-db.sh"]
 
 ENTRYPOINT	["docker-entrypoint.sh"]
-
-# CMD	[ "php-fpm7.3", "-F" ]
-# # DEBUG
-# CMD [ "sleep", "infinity" ]

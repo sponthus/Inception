@@ -1,62 +1,65 @@
+version: "3.8"
+
 services:
 
-  nginx:
-    container_name: nginx
-    depends_on:
-      - wordpress
-    build: 
-      context: requirements/nginx
-    ports:
-      - "4443:4443"
-    volumes:
-      - wordpress:/var/www/html
-    networks:
-      - network
-    environment :
-      - DOMAIN_NAME=sponthus.42.fr
-    restart: always
-    # env_file:
-    #   - .env
+    mariadb:
+        container_name: mariadb
+        image: mariadb
+        build:
+            context: requirements/mariadb
+        volumes:
+                - mariadb:/var/lib/mysql:rw
+        env_file:
+            - .env
+        networks:
+            - network
+        restart: always
 
-  mariadb:
-    container_name: mariadb
-    build:
-      context: requirements/mariadb
-    volumes:
-      - mariadb:/var/lib/mysql
-    networks:
-      - network
-    env_file:
-      - .env
-    restart: always
+    wordpress:
+        container_name: wordpress
+        image: wordpress
+        env_file:
+            - .env
+        build:
+            context: requirements/wordpress
+        depends_on:
+            - mariadb 
+        volumes:
+            - wordpress:/var/www/wordpress:rw
+        networks:
+            - network
+        restart: always
 
-  wordpress:
-    container_name: wordpress
-    depends_on:
-      - mariadb
-    build:
-      context: requirements/wordpress
-    volumes:
-      - wordpress:/var/www/html
-    networks:
-      - network
-    env_file:
-      - .env
+    nginx:
+        container_name: nginx
+        image: nginx
+        build:
+            context: requirements/nginx
+        ports:
+            - "443:443"
+        restart: always
+        volumes:
+            - wordpress:/var/www/wordpress:rw
+        networks:
+            - network
+        depends_on:
+            - wordpress
+
+volumes :
+    mariadb:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: /home/sponthus/data/mariadb
+    wordpress:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: /home/sponthus/data/wordpress
 
 networks:
-  network:
-    driver: bridge
-
-volumes:
-  wordpress:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/$USE/data/wordpress
-  mariadb:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/$USE/data/mariadb
+    network:
+        driver: bridge
+  
