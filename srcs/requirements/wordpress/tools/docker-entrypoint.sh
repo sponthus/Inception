@@ -34,14 +34,14 @@ fi
 if ! wp core is-installed --allow-root; then
     echo "Installing WordPress..."
     wp core install --allow-root \
-        --url="$DN" \
-        --title="$WP_TITLE" \
-        --admin_name="$WP_ADMIN" \
-        --admin_password="$WP_ADMIN_PW" \
-        --admin_email="$WP_ADMIN_MAIL"
+        --url="$DOMAIN_NAME" \
+        --title="$WORDPRESS_TITLE" \
+        --admin_name="$WORDPRESS_ADMIN" \
+        --admin_password="$WORDPRESS_ADMIN_PW" \
+        --admin_email="$WORDPRESS_ADMIN_MAIL"
 
     echo "Creating additional user..."
-    wp user create --allow-root "$WP_USER" "$WP_USER_MAIL" --user_pass="$WP_USER_PW"
+    wp user create --allow-root "$WORDPRESS_USER" "$WORDPRESS_USER_MAIL" --user_pass="$WORDPRESS_USER_PW"
 
     echo "Installing and activating 2024 theme..."
 	rm -rf /var/www/wordpress/wp-content/themes/twentytwentyfour
