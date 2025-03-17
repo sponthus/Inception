@@ -11,13 +11,20 @@ CONTAINER = nginx \
 VOLUMES = srcs_mariadb \
 	srcs_wordpress
 
-all: up
+ENV = srcs/.env
+
+all: $(ENV) up
 
 re: fclean all
 
+$(ENV) : env
+
 env:
-	sh script.sh
-	echo ".env created, feel free to modify informations if needed"
+	@if [ ! -f "$(ENV)" ]; then \
+		echo " ✘ No .env found"; \
+		sh srcs/tools/init.sh; \
+	fi
+	@echo " ✔ .env present, feel free to modify informations if needed"
 
 up: 
 	@mkdir -p /home/sponthus/data
@@ -93,7 +100,7 @@ fclean: clean
 	@docker builder prune -f
 	@echo " ✔ System";
 	@docker system prune -a -f --volumes
-	sudo rm -rf /home/sponthus/data
+	rm -rf /home/sponthus/data
 
 subject:
 	docker stop $$(docker ps -qa)

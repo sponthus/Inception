@@ -5,7 +5,7 @@ echo "-------------------------------------------"
 echo "Emails will automatically be user@42lyon.fr"
 echo "-- Passwords are automatically generated --"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" &>/dev/null && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." &>/dev/null && pwd)"
 ENV_FILE="$PROJECT_ROOT/srcs/.env"
 SECRETS_DIR="$PROJECT_ROOT/secrets"
