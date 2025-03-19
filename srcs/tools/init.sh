@@ -79,7 +79,7 @@ WORDPRESS_USER_PW=$(generate_password "wp_user_password.txt")
 
 
 WORDPRESS_USER=$(get_validated_input "Enter your login: " validate_name)
-WORDPRESS_ADMIN_USER=$(get_validated_input "Enter wordpress admin name: " validate_admin_name)
+WORDPRESS_ADMIN=$(get_validated_input "Enter wordpress admin name: " validate_admin_name)
 WORDPRESS_TITLE=$(get_validated_input "Enter page name: " is_empty)
 
 cat > "$ENV_FILE" << EOF
@@ -92,9 +92,9 @@ DB_ROOT_PW=$DB_ROOT_PW
 
 WORDPRESS_TITLE="$WORDPRESS_TITLE"
 
-WORDPRESS_ADMIN_USER=$WORDPRESS_ADMIN_USER
+WORDPRESS_ADMIN=$WORDPRESS_ADMIN
 WORDPRESS_ADMIN_PW=$WORDPRESS_ADMIN_PW
-WORDPRESS_ADMIN_MAIL=$WORDPRESS_ADMIN_USER@42lyon.fr
+WORDPRESS_ADMIN_MAIL=$WORDPRESS_ADMIN@42lyon.fr
 
 WORDPRESS_USER=$WORDPRESS_USER
 WORDPRESS_USER_MAIL=$WORDPRESS_USER@42lyon.fr

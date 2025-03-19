@@ -100,7 +100,7 @@ fclean: clean
 	@docker builder prune -f
 	@echo " ✔ System";
 	@docker system prune -a -f --volumes
-	rm -rf /home/sponthus/data
+	sudo rm -rf /home/sponthus/data
 
 subject:
 	docker stop $$(docker ps -qa)

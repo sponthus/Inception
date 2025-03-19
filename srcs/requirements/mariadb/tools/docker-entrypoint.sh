@@ -26,7 +26,6 @@ mysql --user=root --password= <<-EOF
 		FLUSH PRIVILEGES;
 	EOF
 
-# Shut down tmp server
 mysqladmin -u root -p$DB_ROOT_PW shutdown
 
 echo "Launching mariadb"
