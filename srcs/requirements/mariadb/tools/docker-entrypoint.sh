@@ -13,9 +13,23 @@ fi
 /usr/bin/mysqld_safe --datadir=/var/lib/mysql &
 
 until mysqladmin ping 2>/dev/null; do
-    echo "Waiting for MariaDB to be ready..."
-    sleep 2
+	echo "Waiting for MariaDB to be ready..."
+	sleep 2
 done
+
+timeout=30
+SECONDS=0
+
+until mysqladmin ping 2>/dev/null || [ "$SECONDS" -ge "$timeout" ]; do
+	echo "Waiting for mariadb ..."
+	sleep 1
+done
+
+if [ "$SECONDS" -ge "$timeout" ]; then
+	echo "Timeout reached."
+else
+	echo "Ping mariadb success."
+fi
 
 echo "Configurating mariadb"
 mysql --user=root --password= <<-EOF
@@ -25,7 +39,6 @@ mysql --user=root --password= <<-EOF
 		GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
 		FLUSH PRIVILEGES;
 	EOF
-
 mysqladmin -u root -p$DB_ROOT_PW shutdown
 
 echo "Launching mariadb"

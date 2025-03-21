@@ -11,19 +11,26 @@
 #  C (country)
 # -nodes = no passphrase
 
-openssl genpkey -algorithm RSA -out /etc/ssl/sponthus.42.fr.key
-openssl req -newkey rsa:4096 \
+if [ ! -f /etc/ssl/sponthus.42.fr.key ]; then
+    openssl genpkey -algorithm RSA -out /etc/ssl/sponthus.42.fr.key
+	echo "Key generated"
+fi
+
+if [ ! -f /etc/ssl/sponthus.42.fr.crt ]; then
+    openssl req -newkey rsa:4096 \
 	-nodes \
 	-x509 \
 	-key /etc/ssl/sponthus.42.fr.key \
 	-out /etc/ssl/sponthus.42.fr.crt \
 	-subj "/C=FR/ST=Lyon/O=42/UID=sponthus/CN=sponthus.42.fr"
-
-echo "Self-signed certificate generated"
-
-echo "include /etc/nginx/sites-available/sponthus.42.fr.conf;" > /etc/nginx/sites-enabled/sponthus.42.fr.conf
+	echo "Self-signed certificate generated"
+	echo "include /etc/nginx/sites-available/sponthus.42.fr.conf;" > /etc/nginx/sites-enabled/sponthus.42.fr.conf
+fi
 
 # Daemon : Nginx would launch in daemon mode, in the background
 # but he is the main process and should stay front otherwise the container would stop
 # -g : Allow ability to give global directions in command lines, taking over nginx.conf
+
+echo "Launching nginx"
+
 nginx -g "daemon off;"
