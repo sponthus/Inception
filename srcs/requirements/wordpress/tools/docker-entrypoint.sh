@@ -14,7 +14,7 @@ if [ ! -f wp-config.php ]; then
 define( 'DB_NAME', '$DB_NAME' );
 define( 'DB_USER', '$DB_USER' );
 define( 'DB_PASSWORD', '$DB_PW' );
-define( 'DB_HOST', 'mariadb:3306' );
+define( 'DB_HOST', '$DB_HOST' );
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
@@ -29,6 +29,21 @@ if ( ! defined('ABSPATH') ) {
 
 require_once ABSPATH . 'wp-settings.php';
 EOF
+fi
+
+timeout=30
+SECONDS=0
+
+echo "Waiting for database connection..."
+until wp db check --allow-root || [ "$SECONDS" -ge "$timeout" ]; do
+  echo "Database not ready..."
+  sleep 5
+done
+
+if [ "$SECONDS" -ge "$timeout" ]; then
+	echo "Timeout reached."
+else
+	echo "Ping mariadb success."
 fi
 
 if ! wp core is-installed --allow-root; then

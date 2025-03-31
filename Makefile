@@ -13,6 +13,8 @@ VOLUMES = srcs_mariadb \
 
 ENV = srcs/.env
 
+COMPOSE_FILE = ./srcs/docker-compose.yml
+
 all: $(ENV) up
 
 re: fclean all
@@ -30,13 +32,16 @@ up:
 	@mkdir -p /home/sponthus/data
 	@mkdir -p /home/sponthus/data/wordpress
 	@mkdir -p /home/sponthus/data/mariadb
-	docker compose -f ./srcs/docker-compose.yml up -d --build
+	docker compose -f $(COMPOSE_FILE) up -d --build
 
 down:
-	docker compose -f ./srcs/docker-compose.yml down 
+	docker compose -f $(COMPOSE_FILE) down 
+
+ps:
+	docker compose -f $(COMPOSE_FILE) ps
 
 clean:
-	docker compose -f ./srcs/docker-compose.yml down --rmi all -v --remove-orphans;
+	docker compose -f $(COMPOSE_FILE) down --rmi all -v --remove-orphans;
 
 manual_clean: clean_network
 

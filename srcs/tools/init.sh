@@ -62,11 +62,11 @@ get_validated_input() {
         read -p "$prompt" input
         if [ -z "$validation_func" ]; then
             echo "$input"
-            return 0
+            return 0 # If no validation function available, is ok
         else
             if $validation_func "$input"; then
                 echo "$input"
-                return 0
+                return 0 # Or calls the validation function
             fi
         fi
     done
@@ -83,12 +83,13 @@ WORDPRESS_ADMIN=$(get_validated_input "Enter wordpress admin name: " validate_ad
 WORDPRESS_TITLE=$(get_validated_input "Enter page name: " is_empty)
 
 cat > "$ENV_FILE" << EOF
-DOMAIN_NAME=$WORDPRESS_USER.42.fr
+DOMAIN_NAME=sponthus.42.fr
 
 DB_NAME=wordpress
 DB_USER=maria
 DB_PW=$DB_PW
 DB_ROOT_PW=$DB_ROOT_PW
+DB_HOST=mariadb:3306
 
 WORDPRESS_TITLE="$WORDPRESS_TITLE"
 

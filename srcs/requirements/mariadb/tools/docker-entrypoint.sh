@@ -1,21 +1,20 @@
 #!/bin/sh
 
-echo "Creation of $DB_NAME begins"
+echo "Creation of $DB_NAME DB begins"
 
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld
 chown -R mysql:mysql /var/lib/mysql
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
+if [ -d "/var/lib/mysql/$DB_NAME" ]; then
+  echo "Database already exits"
+else
+
+if [ ! -d "/var/lib/mysql" ]; then
     mysql_install_db --user=mysql --datadir=/var/lib/mysql
 fi
 
 /usr/bin/mysqld_safe --datadir=/var/lib/mysql &
-
-until mysqladmin ping 2>/dev/null; do
-	echo "Waiting for MariaDB to be ready..."
-	sleep 2
-done
 
 timeout=30
 SECONDS=0
@@ -39,7 +38,9 @@ mysql --user=root --password= <<-EOF
 		GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
 		FLUSH PRIVILEGES;
 	EOF
+
 mysqladmin -u root -p$DB_ROOT_PW shutdown
+fi
 
 echo "Launching mariadb"
 exec mariadbd --bind_address=0.0.0.0
