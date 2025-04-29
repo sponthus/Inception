@@ -15,7 +15,7 @@
 
 ## :memo: Status
 <p align="center">
-  <img src="https://github.com/sponthus/assets/blob/main/42school/scores/100_outstanding.png" alt="100 grade - outstanding"/>
+  <img src="https://github.com/sponthus/assets/blob/main/42school/scores/100.png" alt="100 grade"/>
   <br><strong>Validated 2025-03-28</strong>
   <br>Outstanding :star:
 </p>
